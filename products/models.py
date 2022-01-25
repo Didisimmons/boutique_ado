@@ -4,6 +4,11 @@ from django.db import models
 
 
 class Category(models.Model):
+    """
+    adjust the verbose name or the plural form of it from the Django defaults dashboard.
+    """
+    class Meta:
+        verbose_name_plural = 'Categories'
     name = models.CharField(max_length=254)
     # makes the name appear more friendly on the front end and is optional.
     # the name field gives us a programmatic way to find it in things like views and other code.
@@ -34,6 +39,6 @@ class Product(models.Model):
     image_url = models.URLField(max_length=1024, null=True, blank=True)
     image = models.ImageField(null=True, blank=True)
 
-    # return product name 
+    # return product name
     def __str__(self):
         return self.name
