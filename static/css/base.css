@@ -1,5 +1,6 @@
+
 html{
-    height:100; /* will allow our h100 classes in vertical cetering to work */
+    height:100%; /* will allow our h100 classes in vertical cetering to work */
 }
 
 body{
@@ -59,6 +60,9 @@ body{
     border: 1px solid black !important;
 }
 
+.bg-black {
+    background: #000 !important;
+}
 /* -------------------------------- Media Queries */
 
 /* Slightly larger container on xl screens */

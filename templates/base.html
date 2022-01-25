@@ -30,7 +30,7 @@
         {% block extra_js %}
         {% endblock %}
   
-        <!--will allow us to add an extra chunk of text to the page title if we want for example if we wanted it to say something like boutique addo - products or
+        <!-- will allow us to add an extra chunk of text to the page title if we want for example if we wanted it to say something like boutique addo - products or
         boutique addo - home on different pages of the site we could put that in this block moving into the body-->
             <title>Boutique Ado {% block extra_title %}{% endblock %}</title>
   </head>
@@ -110,6 +110,22 @@
                     </li>
                 </ul>
             </div>
+        </div>
+        <div class="row bg-white">
+            <nav class="navbar navbar-expand-lg navbar-light w-100">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <!-- mobile version of top header -->
+                {% include 'includes/mobile_top_header.html' %} 
+                <!-- main nav menu -->
+                {% include 'includes/main_nav.html' %} 
+            </nav>
+        </div>
+        <div id="delivery-banner" class="row text-center">
+            <div class="col bg-black text-white">
+                <h4 class="logo-font my-1">Free delivery on orders over ${{ free_delivery_threshold }}!</h4>                
+            </div>            
         </div>
     </header>
 
