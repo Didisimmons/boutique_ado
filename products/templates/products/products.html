@@ -51,26 +51,42 @@
                             </div>
                         </div>
                     </div>
-                    {% if forloop.counter|divisibleby:1 %}
+                    <!-- create a full-width horizontal rule after each row of products.for example, we knew that there were four columns on the screen and thus every fifth column we'd render a full-width column. In other words a col-12
+                    If there were three products in each row then we'd want to render the full width column every fourth column every third column when there are two products.
+                    and every other column when the products are stacked one by one -->
+                        
+                        {% if forloop.counter|divisibleby:1 %}
+                        <!--mobile products stack diplay-->
                         <div class="col-12 d-sm-none mb-5">
                             <hr>
                         </div>
-                    {% endif %}                        
-                    {% if forloop.counter|divisibleby:2 %}
+                        {% endif %}
+                        
+                        <!--to keep it hidden on extra small screens. And display block on small screens and larger-->
+                        {% if forloop.counter|divisibleby:2 %}
+                        <!--render this column on small and medium screens only when the iteration number of the loop is divisible by two.-->
                         <div class="col-12 d-none d-sm-block d-md-block d-lg-none mb-5">
                             <hr>
                         </div>
-                    {% endif %}
-                    {% if forloop.counter|divisibleby:3 %}
-                        <div class="col-12 d-none d-lg-block d-xl-none mb-5">
-                            <hr>
-                        </div>
-                    {% endif %}
-                    {% if forloop.counter|divisibleby:4 %}
-                        <div class="col-12 d-none d-xl-block mb-5">
-                            <hr>
-                        </div>
-                    {% endif %}
+                        {% endif %}
+
+                        {% if forloop.counter|divisibleby:3 %}
+                            <div class="col-12 d-none d-lg-block d-xl-none mb-5">
+                                <hr>
+                            </div>
+                        {% endif %}
+
+                        {% if forloop.counter|divisibleby:4 %}
+                            <div class="col-12 d-none d-xl-block mb-5">
+                                <hr>
+                            </div>
+                        {% endif %}
+                 
+                    
+                                
+                  
+                    
+                    
                 {% endfor %}
             </div>
         </div>
