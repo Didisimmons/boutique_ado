@@ -26,11 +26,12 @@
                     <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
                         <div class="card h-100 border-0">
                             {% if product.image %}
-                            <a href="">
+                            <!-- we're working with the actual Django object so we need product.id to get the id attribute, the product_id is what it'll be called in the view, -->
+                            <a href="{% url 'product_detail' product.id %}">
                                 <img class="card-img-top img-fluid" src="{{ product.image.url }}" alt="{{ product.name }}">
                             </a>
                             {% else %}
-                            <a href="">
+                            <a href="{% url 'product_detail' product.id %}">
                                 <img class="card-img-top img-fluid" src="{{ MEDIA_URL }}noimage.png" alt="{{ product.name }}">
                             </a>
                             {% endif %}
@@ -61,7 +62,7 @@
                             <hr>
                         </div>
                         {% endif %}
-                        
+
                         <!--to keep it hidden on extra small screens. And display block on small screens and larger-->
                         {% if forloop.counter|divisibleby:2 %}
                         <!--render this column on small and medium screens only when the iteration number of the loop is divisible by two.-->

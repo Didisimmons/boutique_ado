@@ -83,6 +83,7 @@ body{
   }
 }
 
+
 /* fixed top navbar only on medium and up */
 @media (min-width: 992px) {
     /* main header look different from mobile and want these effects to apply to larger ad meduim screes */ 
@@ -97,5 +98,16 @@ body{
     /* push page body down to the bottom of the main page header */ 
     .header-container {
         padding-top: 164px;
+    }
+}
+
+/* pad the top a bit when navbar is collapsed on mobile pushing the top of the page down  to the bottom of the main site header  */
+@media (max-width: 991px) {
+    .header-container {
+        padding-top: 116px;
+    }
+
+    body {
+        height: calc(100vh - 116px);
     }
 }
