@@ -5,13 +5,15 @@ from django.db import models
 
 class Category(models.Model):
     """
-    adjust the verbose name or the plural form of it from the Django defaults dashboard.
+    adjust the verbose name or the plural form of it from
+    the Django defaults dashboard.
     """
     class Meta:
         verbose_name_plural = 'Categories'
     name = models.CharField(max_length=254)
     # makes the name appear more friendly on the front end and is optional.
-    # the name field gives us a programmatic way to find it in things like views and other code.
+    # the name field gives us a programmatic way to find it in things
+    # like views and other code.
     friendly_name = models.CharField(max_length=254, null=True, blank=True)
 
     def __str__(self):

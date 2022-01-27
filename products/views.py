@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q  # generate search query
+from django.db.models.functions import Lower
 from .models import Product, Category
 
 # Create your views here.
@@ -38,18 +39,17 @@ def all_products(request):
             """
             sort = sortkey
             """
-            in order to allow case-insensitive sorting on the name field,
-            we need to annotate the current list of products with a new field.
-            Annotation allows us to add a temporary field on a model.
-            Check whether the sort key is equal to name.And if it is will
-            set it to lower_name, which is the field we're about to create
-            with the annotation.
+            the annotate is being used for here, is to add an extra field to
+            the model (lower_name) which just converts the existing 'name'
+            field to lowercase, allowing you to sort it
             """
             # In the event, the user is sorting by name.
             if sortkey == 'name':
                 sortkey = 'lower_name'
-                # we're just using the lower function
-                # on the original name field here.
+                """
+                .annotate() does is add additional 'fields' to the queryset
+                in this view.It allows you to add functionality to the view.
+                """
                 products = products.annotate(lower_name=Lower('name'))
 
             # categories to be sorted by name instead of their ids.
@@ -115,9 +115,10 @@ def all_products(request):
             queries = Q(name__icontains=query) | Q(description__icontains=query)
             # filter method in order to actually filter the products.
             products = products.filter(queries)
-    # return the current sorting methodology to the
-    # template using string formatting.
-    # Note that the value of this variable will be the string none_none. If there is no sorting.
+    # is a string made up of two other variables: sort and direction
+    # If neither of these variables is determined, they are set to what
+    # they were at the top of the view which is none_none.
+    # If there is no sorting.
     current_sorting = f'{sort}_{direction}'
 
     context = {

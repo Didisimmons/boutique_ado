@@ -78,9 +78,6 @@
                             <div class="card-body pb-0">
                                 <p class="mb-0">{{ product.name }}</p>
                             </div>
-                            {{ search_term}}
-                            {{ current_categories }}
-                            {{ current_sorting }}
                             <div class="card-footer bg-white pt-0 border-0 text-left">
                                 <div class="row">
                                     <div class="col">
@@ -138,4 +135,53 @@
         </div>
     </div>
 </div>
+<div class="btt-button shadow-sm rounded-0 border border-black">
+    <a class="btt-link d-flex h-100">
+        <i class="fas fa-arrow-up text-black mx-auto my-auto"></i>
+    </a>	
+</div>
+{% endblock %}
+
+{% block postloadjs %}
+    {{ block.super }} <!--Using block.super will ensure we append this code to anything already in the block as opposed to replacing it-->
+
+    <script type="text/javascript">
+		$('.btt-link').click(function(e) {
+			window.scrollTo(0,0)
+		})
+	</script>
+    
+<script type="text/javascript">
+    $('#sort-selector').change(function() {
+        var selector = $(this);
+        /* Using the url object will give us some nice functionality in particular
+        the ability to replace the current get parameters which is required in order to
+        update the sorting methodology */
+        var currentUrl = new URL(window.location);
+
+        /* get the selected value from the selector box and again this value refers to the value attribute from the selected option element in the selector box */
+        var selectedVal = selector.val();
+        /* if statement to determine if the selected value is reset. Indicating that we want to reset the sorting to the default that we would see on the products page.
+        If it's not I can easily get the sort and direction by splitting the selected value at the underscore.*/
+        if(selectedVal != "reset"){
+            /* the first item from the split will be the item we're sorting on */ 
+            var sort = selectedVal.split("_")[0];
+            /*the second will be the direction either ascending or descending.*/
+            var direction = selectedVal.split("_")[1];
+
+            /* replacing those get parameters in the URL, Replacing the location will also cause the page to reload which will resort the products accordingly.*/
+            currentUrl.searchParams.set("sort", sort);
+            currentUrl.searchParams.set("direction", direction);
+            
+            /* with the new URL constructed I'll replace the current location with the updated current URL replacing the location will also cause the page to reload which will resort the products accordingly.*/
+            window.location.replace(currentUrl);
+        } else {
+            /* If the user has selected the reset option. I'll simply delete the sort and direction get parameters and then replace the location.*/
+            currentUrl.searchParams.delete("sort");
+            currentUrl.searchParams.delete("direction");
+
+            window.location.replace(currentUrl);
+        }
+    })
+</script>
 {% endblock %}
