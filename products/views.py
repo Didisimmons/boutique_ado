@@ -7,74 +7,90 @@ from .models import Product, Category
 
 
 def all_products(request):
-    """ 
+    """
     A view to show all products, including sorting and search queries
     the context allows us to send things back to the template
     """
     # return all products from database
-    #need to make sure what we want to query such as sort is defined in order to return the template properly when we're not using any of the queries.
     products = Product.objects.all()
-    # start with it as none at the top of this view to ensure we don't get an error
-    # when loading the products page without a search term
+    # need to make sure what we want to query such as sort is defined in order
+    # to return the template properly when we're not using any of the queries
+    # and when not remove any errors
     query = None
     # to capture this category parameter.
     categories = None
     sort = None
     direction = None
-    
 
     if request.GET:
         """
-        If the requests get parameters do contain sort. 
+        If the requests get parameters do contain sort.
         """
         if 'sort' in request.GET:
-            sortKey = request.GET['sort']
-            """the reason for copying the sort parameter into a new variable called sortkey.
-            Is because now we've preserved the original field we want it to sort on name.
-            But we have the actual field we're going to sort on, lower_name in the sort key variable.
-            If we had just renamed sort itself to lower_name we would have lost the original field name.
+            sortkey = request.GET['sort']
             """
-            sort = sortKey
+            the reason for copying the sort parameter into a new variable
+            called sortkey.Is because now we've preserved the original field
+            we want it to sort on name.But we have the actual field we're
+            going to sort on, lower_name in the sort key variable.If we had
+            just renamed sort itself to lower_name we would have lost the
+            original field name.
+            """
+            sort = sortkey
             """
             in order to allow case-insensitive sorting on the name field,
-            we need to first annotate all the products with a new field.
+            we need to annotate the current list of products with a new field.
             Annotation allows us to add a temporary field on a model.
+            Check whether the sort key is equal to name.And if it is will
+            set it to lower_name, which is the field we're about to create
+            with the annotation.
             """
             # In the event, the user is sorting by name.
-            if sortKey == 'name':
-                sortKey = 'lower_name'
-                # we annotate the current list of products with a new field.
+            if sortkey == 'name':
+                sortkey = 'lower_name'
+                # we're just using the lower function
+                # on the original name field here.
                 products = products.annotate(lower_name=Lower('name'))
-                
+
+            # categories to be sorted by name instead of their ids.
+            if sortkey == 'category':
+                sortkey = 'category__name'
+                """
+                This would  effectively changing this line to
+                products = products.order_by(category__name)
+                """
+
             if 'direction' in request.GET:
-                # 
                 direction = request.GET['direction']
-                # check whether the direction is descending in order to decide whether to reverse the order.
+                # check whether the direction is descending in order
+                # to decide whether to reverse the order.
                 if direction == 'desc':
                     # minus in front of the sort key will reverse the order.
-                    sortKey = f'-{sortKey}'
-            # soort products
-            products = products.order_by(sortKey)
+                    sortkey = f'-{sortkey}'
+            # sort products
+            products = products.order_by(sortkey)
 
         """
         if category exist in request, split it into a list at the commas.
-        And then use that list to filter the current query set of all 
+        And then use that list to filter the current query set of all
         products down to only products whose category name is in the list.
         """
         if 'category' in request.GET:
             categories = request.GET['category'].split(',')
             """
-            using the double underscore syntax is common when making queries in django.
-            Using it here means we're looking for the name field of the category model.
-            And we're able to do this because category and product are related with a foreign key.
+            using the double underscore syntax is common when making queries
+            in django.Using it here means we're looking for the name field of
+            the category model.And we're able to do this because category and
+            product are related with a foreign key.
             """
             products = products.filter(category__name__in=categories)
-            # display for the user which categories they currently have selected.
-            # filter all categories down to the ones whose name is in the list from the URL.
+            # display for the user categories they currently selected
+            # filter all categories down to the ones whose name is in the
+            # list from the URL.
             """
-            we're converting the list of strings of category names passed through 
-            the URL into a list of actual category objects, so that we can access
-            all their fields in the template.
+            we're converting the list of strings of category names
+            passed through the URL into a list of actual category
+            objects, so that we can access all their fields in the template.
             """
             categories = Category.objects.filter(name__in=categories)
 
@@ -83,10 +99,11 @@ def all_products(request):
             if not query:
                 """
                 If the query is blank it's not going to return any results.Use
-                the Django messages framework to attach an error message to the request.
-                And then redirect back to the products url.
+                the Django messages framework to attach an error message to the
+                request.And then redirect back to the products url.
                 """
-                messages.error(request, "You didn't enter any search criteria!")
+                messages.error(request,
+                               "You didn't enter any search criteria!")
                 return redirect(reverse('products'))
 
             """
@@ -96,14 +113,16 @@ def all_products(request):
             # The pipe here is what generates the or statement
             # the i in front of contains makes the queries case insensitive.
             queries = Q(name__icontains=query) | Q(description__icontains=query)
-            # I can pass them to the filter method in order to actually filter the products.
+            # filter method in order to actually filter the products.
             products = products.filter(queries)
-    # return the current sorting methodology to the template using string formatting.
+    # return the current sorting methodology to the
+    # template using string formatting.
+    # Note that the value of this variable will be the string none_none. If there is no sorting.
     current_sorting = f'{sort}_{direction}'
 
     context = {
         'products': products,
-        'search_item': query,
+        'search_term': query,
         'current_categories': categories,
         'current_sorting': current_sorting,
     }
