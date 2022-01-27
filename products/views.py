@@ -7,18 +7,55 @@ from .models import Product, Category
 
 
 def all_products(request):
-    """ A view to show all products, including sorting and search queries
-    the context allows us to send things back to the template"""
+    """ 
+    A view to show all products, including sorting and search queries
+    the context allows us to send things back to the template
+    """
     # return all products from database
+    #need to make sure what we want to query such as sort is defined in order to return the template properly when we're not using any of the queries.
     products = Product.objects.all()
     # start with it as none at the top of this view to ensure we don't get an error
     # when loading the products page without a search term
     query = None
     # to capture this category parameter.
     categories = None
+    sort = None
+    direction = None
     
 
     if request.GET:
+        """
+        If the requests get parameters do contain sort. 
+        """
+        if 'sort' in request.GET:
+            sortKey = request.GET['sort']
+            """the reason for copying the sort parameter into a new variable called sortkey.
+            Is because now we've preserved the original field we want it to sort on name.
+            But we have the actual field we're going to sort on, lower_name in the sort key variable.
+            If we had just renamed sort itself to lower_name we would have lost the original field name.
+            """
+            sort = sortKey
+            """
+            in order to allow case-insensitive sorting on the name field,
+            we need to first annotate all the products with a new field.
+            Annotation allows us to add a temporary field on a model.
+            """
+            # In the event, the user is sorting by name.
+            if sortKey == 'name':
+                sortKey = 'lower_name'
+                # we annotate the current list of products with a new field.
+                products = products.annotate(lower_name=Lower('name'))
+                
+            if 'direction' in request.GET:
+                # 
+                direction = request.GET['direction']
+                # check whether the direction is descending in order to decide whether to reverse the order.
+                if direction == 'desc':
+                    # minus in front of the sort key will reverse the order.
+                    sortKey = f'-{sortKey}'
+            # soort products
+            products = products.order_by(sortKey)
+
         """
         if category exist in request, split it into a list at the commas.
         And then use that list to filter the current query set of all 
@@ -61,11 +98,14 @@ def all_products(request):
             queries = Q(name__icontains=query) | Q(description__icontains=query)
             # I can pass them to the filter method in order to actually filter the products.
             products = products.filter(queries)
+    # return the current sorting methodology to the template using string formatting.
+    current_sorting = f'{sort}_{direction}'
 
     context = {
         'products': products,
         'search_item': query,
         'current_categories': categories,
+        'current_sorting': current_sorting,
     }
     return render(request, 'products/products.html', context)
 

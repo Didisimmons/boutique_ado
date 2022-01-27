@@ -6,9 +6,11 @@
             </a>
             <!-- This menu would allow the user to either see all products at once or sort them by price -->
             <div class="dropdown-menu border-0" aria-labelledby="all-products-link">
-                <a href="" class="dropdown-item">By Price</a>
-                <a href="" class="dropdown-item ">By Rating</a>
-                <a href="" class="dropdown-item ">By Category</a>
+                <!--two new get parameters, Sort and direction.These fields are fields on the product model by the way which means we could add additional functionality here if we wanted.
+                Such as sorting by SKU or whether or not the product has an image.-->
+                <a href="{% url 'products' %}?sort=price&direction=asc" class="dropdown-item">By Price</a>
+                <a href="{% url 'products' %}?sort=rating&direction=desc" class="dropdown-item ">By Rating</a>
+                <a href="{%url 'products' %}?sort=category&direction=asc" class="dropdown-item ">By Category</a>
                 <a href="{% url 'products'%}" class="dropdown-item">All Products</a>
             </div>
         </li>
