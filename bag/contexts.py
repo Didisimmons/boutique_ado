@@ -1,5 +1,7 @@
 from decimal import Decimal
 from django.conf import settings
+from django.shortcuts import get_object_or_404
+from products.models import Product
 
 def bag_contents(request):
     """
@@ -15,6 +17,33 @@ def bag_contents(request):
     bag_items = [] # empty list for bag items to live
     total = 0
     product_count = 0
+    # In order to add all the bags current items to the context of all templates.
+    # Accessing the shopping bag in the session, retrieve bag if it exixts else initialize it to an empty dictionary
+    bag = request.session.get('bag', {})
+    """
+    We need to iterate through all the items in the shopping bag.
+    tally up the total cost and product count.
+    And add the products and their data to the bag items list.
+    display them on the shopping bag page and throughout the site.
+    """
+    # bag from session
+    for item_id, quantity in bag.items():
+        # retrieve product
+        product = get_object_or_404(Product, pk=item_id)
+        total += quantity * product.price
+        product_count += quantity
+        """
+        add a dictionary to the list of bag items containing not only
+        the id and the quantity,But also the product object itself.
+        This will give us access to all the other fields such as the product image and so on.
+        When iterating through the bag items in our templates.
+        """
+
+        bag_items.append({
+            'item_id': item_id,
+            'quantity': quantity,
+            'product': product,
+        })
 
     """
     To entice customers to purchase more.We're going

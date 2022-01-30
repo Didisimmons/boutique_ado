@@ -24,6 +24,7 @@ def add_to_bag(request, item_id):
     and so on without losing the contents of their bag
     """
     # we first check to see if there's a bag variable in the session and if not we'll create one.
+    # stuffinng the producst into the bag 
     bag = request.session.get('bag', {})
 
     """
@@ -34,10 +35,10 @@ def add_to_bag(request, item_id):
     if item_id in list(bag.keys()):
         bag[item_id] += quantity
     else:
+        # key of the items id equal to quanity
         bag[item_id] = quantity
 
     # putting this the bag variable into the session.
     # To overwrite the variable in the session with the updated version.
     request.session['bag'] = bag
-    print(request.session['bag'])
     return redirect(redirect_url)
