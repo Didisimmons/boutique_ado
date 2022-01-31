@@ -27,23 +27,49 @@ def bag_contents(request):
     display them on the shopping bag page and throughout the site.
     """
     # bag from session
-    for item_id, quantity in bag.items():
-        # retrieve product
-        product = get_object_or_404(Product, pk=item_id)
-        total += quantity * product.price
-        product_count += quantity
+    for item_id, item_data in bag.items():
         """
-        add a dictionary to the list of bag items containing not only
-        the id and the quantity,But also the product object itself.
-        This will give us access to all the other fields such as the product image and so on.
-        When iterating through the bag items in our templates.
+        only want to execute this code if the item has no sizes.
+        Which will be evident by checking whether or not the item
+        data is an integer.If it's an integer then we know the item
+        data is just the quantity.Otherwise we know it's a dictionary
+        and we need to iterate through the inner dictionary of items_by_size
+        incrementing the product count and total accordingly.also for each of
+        these items, we'll add the size to the bag items returned to the template as well.
         """
-
-        bag_items.append({
-            'item_id': item_id,
-            'quantity': quantity,
-            'product': product,
-        })
+        if isinstance(item_data, int):
+            product = get_object_or_404(Product, pk=item_id)
+            total += item_data * product.price
+            product_count += item_data
+            """
+            add a dictionary to the list of bag items containing not only
+            the id and the quantity,But also the product object itself.
+            This will give us access to all the other fields such as the product image and so on.
+            When iterating through the bag items in our templates.
+            """
+            bag_items.append({
+                'item_id': item_id,
+                'quantity': item_data,
+                'product': product,
+            })
+        else:
+            """
+            need to iterate through the inner dictionary of items_by_size
+            incrementing the product count and total accordingly.Also
+            for each of these items, we'll add the size to the bag items
+            returned to the template as well.This is how we'll be able to
+            render the sizes in the template.
+            """
+            product = get_object_or_404(Product, pk=item_id)
+            for size, quantity in item_data['items_by_size'].items():
+                total += quantity * product.price
+                product_count += quantity
+                bag_items.append({
+                    'item_id': item_id,
+                    'quantity': item_data,
+                    'product': product,
+                    'size': size,
+                })
 
     """
     To entice customers to purchase more.We're going
