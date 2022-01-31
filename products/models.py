@@ -36,6 +36,15 @@ class Product(models.Model):
     sku = models.CharField(max_length=254, null=True, blank=True)
     name = models.CharField(max_length=254)
     description = models.TextField()
+    # This would be false by default and allowed to be blank both in the database and in forms.
+    """ 
+    rather than actually implement different sizes for every product.
+    in the database.this project we'll mimic the functionality by simply
+    describing whether or not the object has different sizes available.
+    And if so we'll provide the user a choice of some generic sizes.
+    Which will be added to the item details in their shopping bag.
+    """     
+    has_sizes = models.BooleanField(default=False, null=True, blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     rating = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     image_url = models.URLField(max_length=1024, null=True, blank=True)
