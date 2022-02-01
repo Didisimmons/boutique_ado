@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load bag_tools %}
 
 {% block page_header %}
     <div class="header-container container">
@@ -55,7 +56,7 @@
                                         <p class="my-0">${{ item.product.price }}</p>
                                     </td>
                                     <td class="py-3 w-25">
-                                        <form class="form update-form" method="POST" action="">
+                                        <form class="form update-form" method="POST" action="{% url 'adjust_bag' item.item_id %}">
                                             {% csrf_token %}
                                             <div class="form-group">
                                                 <!--since there's no product template variable here, it's called item.We need to update all the template variables that contain product.id to item.item_id-->
@@ -90,10 +91,11 @@
                                             </div>
                                         </form>
                                         <a class="update-link text-info"><small>Update</small></a>
-                                        <a class="remove-item text-danger float-right" id="remove_{{ item.item_id }}" data-size="{{ item.size }}"><small>Remove</small></a>
+                                        <a class="remove-item text-danger float-right" id="remove_{{ item.item_id }}" data-product_size="{{ item.size }}"><small>Remove</small></a>
                                     </td>
                                     <td class="py-3">
-                                        <p class="my-0">${{ item.product.price }}</p>
+                                        <!-- Ensures that the subtotal calculates the correct price ad displays it -->
+                                        <p class="my-0">${{ item.product.price | calc_subtotal:item.quantity }}</p>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -147,7 +149,6 @@
 {% block postloadjs %}
 {{ block.super }}
 {% include 'products/includes/quantity_input_script.html' %}
-{% endblock %}
 
 <!--On the click event of the update link.I'll use the previous method to find the most recently seen update form in the Dom.Store the form in a variable. And then call the forms submit method.-->
 <script type="text/javascript">
@@ -162,11 +163,10 @@
         var csrfToken = "{{ csrf_token }}";
         /* The item id can be obtained by splitting the ID of the update link being clicked on at the underscore and taking the second half of it */
         var itemId = $(this).attr('id').split('remove_')[1];
-        var size = $(this).data('size');
-        var url = `/bag/remove/${itemId}`;
+        var size = $(this).data('product_size');
+        var url = `/bag/remove/${itemId}/`;
         // The CSRF middleware token key will match the field Django is expecting to see in request.post when we post it to the server
-        var data = {'csrfmiddlewaretoken': csrfToken, 'size': size};
-        
+        var data = {'csrfmiddlewaretoken': csrfToken, 'product_size': size};
         
         // using the post method from jQuery Giving it both the URL and the data and when done. Will execute a function to reload the page.
         $.post(url, data)
@@ -175,4 +175,4 @@
          });
     })
 </script>
-{
+{% endblock %}
