@@ -1,9 +1,13 @@
 from django.shortcuts import render, redirect, reverse, HttpResponse
+from django.contrib import messages
+
+from products.models import Product
 
 # Create your views here.
 def view_bag(request):
     """ A view that renders the bag contents page """
     return render(request, 'bag/bag.html')
+
 
 """
 This view we'll get the bag variable if it exists in the session or create it if it doesn't.
@@ -12,6 +16,8 @@ And
 """
 def add_to_bag(request, item_id):
     """ Add a quantity of the specified product to the shopping bag """
+
+    product = Product.objects.get(pk=item_id) # To add a message to the request object
     quantity = int(request.POST.get('quantity')) # we need to convert it to an integer since it'll come from the template as a string
     redirect_url = request.POST.get('redirect_url')
     # Size starts out as None
@@ -68,6 +74,8 @@ def add_to_bag(request, item_id):
         else:
             # key of the items id equal to quanity
             bag[item_id] = quantity
+            # using some string formatting to let the user know they've added this product to their bag.
+            messages.success(request, f'Added { product.name } to your bag')
 
     # putting this the bag variable into the session.
     # To overwrite the variable in the session with the updated version.
@@ -141,10 +149,7 @@ def remove_from_bag(request, item_id):
                 bag.pop(item_id)
     
         else:
-            if quantity > 0 :
-                bag[item_id] = quantity
-            else:
-                bag.pop(item_id)
+            bag.pop(item_id)
 
         request.session['bag'] = bag
         return HttpResponse(status=200)
