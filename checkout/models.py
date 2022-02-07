@@ -43,7 +43,14 @@ class Order(models.Model):
         called line-item total sum which we can then get and set the 
         order total to that.
         """
-        self.order_total = self.lineitems.aggregate(Sum('lineitem_total'))['lineitem_total__sum']
+        """
+        The zero will prevent an error if we manually delete all the
+        line items from an order by making sure that this sets the
+        order total to zero instead of none. Without this, the next
+        line would cause an error because it would try to determine if
+        none is less than or equal to the delivery threshold
+        """
+        self.order_total = self.lineitems.aggregate(Sum('lineitem_total'))['lineitem_total__sum'] or 0
         if self.order_total < settings.FREE_DELIVERY_THRESHOLD:
             self.delivery_cost = self.order_total * settings.STANDARD_DELIVERY_PERCENTAGE / 100
         else:
