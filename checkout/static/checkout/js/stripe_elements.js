@@ -59,6 +59,9 @@ form.addEventListener('submit', function(ev) {
     // before sending info, the card element and submit button are disabled to prevent multiple submissions
     card.update({ 'disabled': true});
     $('#submit-button').attr('disabled', true);
+    // to trigger the overlay and fade out the form when the user clicks the submit button and reverse that if there's any error.
+    $('#payment-form').fadeToggle(100);
+    $('#loading-overlay').fadeToggle(100);
     // This sends the card information securely to stripe
     // clientSecret is are python variable syntax used above  
     stripe.confirmCardPayment(clientSecret, {
@@ -75,6 +78,8 @@ form.addEventListener('submit', function(ev) {
                 <span>${result.error.message}</span>`;
             // if there's an error we want to re-enable the card element and submit button to allow the user fix it. 
             $(errorDiv).html(html);
+            $('#payment-form').fadeToggle(100);
+            $('#loading-overlay').fadeToggle(100);
             card.update({ 'disabled': false});
             $('#submit-button').attr('disabled', false);
         } else {

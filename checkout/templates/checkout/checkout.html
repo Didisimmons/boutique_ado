@@ -152,6 +152,15 @@
             </div>
         </div>
     </div>
+
+    <!-- This will have a big giant spinner icon right in the center of the screen and a transparent blue overlay to cover up the page and indicate that the payment is being processed.-->
+    <div id="loading-overlay"> 
+        <h1 class="text-light logo-font loading-spinner">
+            <span class="icon">
+                <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+            </span>
+        </h1>
+    </div>
 {% endblock %}
 {% block postloadjs %}
 <!-- Since we can't render Django template variables in external javascript files. We need to use a built-in template filter called json_script,To render them here. And then we can access them in the external file.-->
