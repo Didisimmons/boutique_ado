@@ -20,11 +20,14 @@ class Order(models.Model):
     street_address1 = models.CharField(max_length=80, null=False, blank=False)
     street_address2 = models.CharField(max_length=80, null=True, blank=True)
     county = models.CharField(max_length=80, null=True, blank=True)
-    date = models.DateTimeField(auto_now_add=True) # The auto now add attribute on the date field which will automatically set the order date and time whenever a new order is created.
+    date = models.DateTimeField(auto_now_add=True)  # The auto now add attribute on the date field which will automatically set the order date and time whenever a new order is created.
     # the last three fields will be calculated using a model method when an order is saved
     delivery_cost = models.DecimalField(max_digits=6, decimal_places=2, null=False, default=0)
     order_total = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0)
     grand_total = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0)
+    # To assist customers to purchase the same things twice on separate occasions
+    original_bag = models.TextField(null=False, blank=False, default='')  # contains the original shopping bag that created it
+    stripe_pid = models.CharField(max_length=254, null=False, blank=False, default='')  # contains the stripe payment intent id which is unique
 
     # quick model methods it's prepended with an underscore by convention to indicate it's a private method
     def _generate_order_number(self):
