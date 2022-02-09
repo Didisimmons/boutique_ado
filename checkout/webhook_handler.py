@@ -1,13 +1,14 @@
 from django.http import HttpResponse
 
+"""
+Handle Stripe webhooks
+The idea here is that for each type of webhook.
+We want a different method to handle it which makes them easy to manage.
+And makes it easy to add more as stripe adds new ones.
+"""
+
 
 class StripeWH_Handler:
-    """
-    Handle Stripe webhooks
-    The idea here is that for each type of webhook.
-    We want a different method to handle it which makes them easy to manage.
-    And makes it easy to add more as stripe adds new ones.
-    """
     """
     The init method of the class is a setup method that's called
     every time an instance of the class is created.
@@ -23,20 +24,24 @@ class StripeWH_Handler:
         Handle a generic/unknown/unexpected webhook event
         The class method will take the event stripe is sending us
         and simply return an HTTP response indicating it was received.
+        print out the payment intent coming from stripe once the user
+        makes a payment. With any luck it should have our metadata attached
         """
         return HttpResponse(
             content=f'Unhandled webhook received: {event["type"]}',
             status=200)
 
-    
     def handle_payment_intent_succeeded(self, event):
         """
         Handle the payment_intent.succeeded webhook from Stripe
         This will be sent each time a user completes the payment process.
         """
+        intent = event.data.object
+        print(intent)
         return HttpResponse(
             content=f'Webhook received: {event["type"]}',
             status=200)
+
 
     def handle_payment_intent_payment_failed(self, event):
         """
