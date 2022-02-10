@@ -24,12 +24,11 @@ class OrderForm(forms.ModelForm):
             'full_name': 'Full Name',
             'email': 'Email Address',
             'phone_number': 'Phone Number',
-            'country': 'Country',
             'postcode': 'Postal Code',
             'town_or_city': 'Town or City',
             'street_address1': 'Street Address 1',
             'street_address2': 'Street Address 2',
-            'county': 'County',
+            'county': 'County, State or Locality', 
         }
 
         """
@@ -42,12 +41,13 @@ class OrderForm(forms.ModelForm):
         if it's a required field on the model.
         """
         for field in self.fields:
-            if self.fields[field].required:
-                placeholder = f'{placeholders[field]} *'
-            else:
-                placeholder = placeholders[field]
-            # Setting all the placeholder attributes to their values in the dictionary above.
-            self.fields[field].widget.attrs['placeholder'] = placeholder
+            if field != 'country':  # if the field is not equal to country , make the other fields mandatory 
+                if self.fields[field].required:
+                    placeholder = f'{placeholders[field]} *'
+                else:
+                    placeholder = placeholders[field]
+                # Setting all the placeholder attributes to their values in the dictionary above.
+                self.fields[field].widget.attrs['placeholder'] = placeholder
             """
             Adding a CSS class(stripe-style-input) that would be applied on the stripe
             classes in checkout.css  we'll use later. Then removing the form fields labels.

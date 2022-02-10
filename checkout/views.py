@@ -11,12 +11,23 @@ from bag.contexts import bag_contents
 import stripe
 import json
 
+
 @require_POST
 def cache_checkout_data(request):
     try:
+        """
+        a way to determie in the webhoook whether a user had saved the
+        save ifo box checked.
+        """ 
         pid = request.POST.get('client_secret').split('_secret')[0]
         stripe.api_key = settings.STRIPE_SECRET_KEY
         stripe.PaymentIntent.modify(pid, metadata={
+            """
+            tell it what we want to modify in our case we'll add some metadata.
+            Let's add the user who's placing the order.
+            Will add whether or not they wanted to save their information.
+            And add a JSON dump of their shopping bag
+            """
             'bag': json.dumps(request.session.get('bag', {})),
             'save_info': request.POST.get('save_info'),
             'username': request.user,
@@ -49,7 +60,7 @@ def checkout(request):
         # create instance of form using form data
         order_form = OrderForm(form_data)
         # if form is valid save order
-        if order_form.is_valid(): # retrieve client secret if form is valid and split it to get the payment intent id
+        if order_form.is_valid():  # retrieve client secret if form is valid and split it to get the payment intent id
             """
             By adding commit equals false this helps
             prevent multiple save events from being executed on the database.
