@@ -7,12 +7,22 @@ from django.conf import settings
 from django_countries.fields import CountryField  # to assist the country field turned to a drop down menu
  
 from products.models import Product
+from profiles.models import UserProfile
 
-# Create your models here.
-""" Handle all orders in the store """
+"""
+Handle all orders in the store
+for user profiles - models.SET_NULL if the profile
+is deleted since that will allow us to keep an order history
+in the admin even if the user is deleted.And will also allow this
+to be either null or blank so that users who don't have an account
+can still make purchases.A related name of orders so we can access
+the users orders by calling something like user.userprofile.orders
+"""
 class Order(models.Model):
     # We're gonna automatically generate this order number and we'll want it to be unique and permanent so users can find their previous orders.
     order_number = models.CharField(max_length=32, null=False, editable=False)
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.SET_NULL,
+                                     null=True, blank=True, related_name='orders')
     full_name = models.CharField(max_length=50, null=False, blank=False)
     email = models.EmailField(max_length=254, null=False, blank=False)
     phone_number = models.CharField(max_length=20, null=False, blank=False)
