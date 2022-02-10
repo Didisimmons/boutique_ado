@@ -1,1 +1,15 @@
-{% extends "base.html" %}
+{% extends "base.html" %}  <!--this one extends the main allauth base.-->
+
+{% block content %}
+    <div class="container header-container"> <!--This is going to replace the main allauth base templates content block.-->
+        <div class="overlay"></div>
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="allauth-form-inner-content"> <!--the login templates content block will just replace it-->
+                    {% block inner_content %}  <!-- renaming the block content to this in other templates file injects their content in this block -->
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

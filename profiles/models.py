@@ -44,6 +44,9 @@ Or just save the profile to update it if the user already existed.
 def create_or_update_user_profile(sender, instance, created, **kwargs):
     """
     Create or update the user profile
+    if you had many users who needed profiles created
+    do it through the shell by getting all the users.
+    And then creating a profile for them in a loop 
     """
     if created:
         UserProfile.objects.create(user=instance)
