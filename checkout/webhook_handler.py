@@ -40,13 +40,11 @@ class StripeWH_Handler:
         """
         Handle the payment_intent.succeeded webhook from Stripe
         This will be sent each time a user completes the payment process.
-        """
-        intent = event.data.object
-        """
         The only reason we're doing this is in case the form isn't
         submitted for some reason.like if the user closes the page
         on the loading screen.
         """
+        intent = event.data.object
         pid = intent.id  # retrieve payment intent and shopping bag
         bag = intent.metadata.bag
         save_info = intent.metadata.save_info  # users save info preference from the metadata stripe_element.js
@@ -84,9 +82,10 @@ class StripeWH_Handler:
                 All of this ensures that when we receive a webhook from stripe that a payment has been processed successfully.
                 We'll try to find an order with the same customer information and the same grand total,
                 Which was created with the exact same shopping bag.And it's associated with the same payment intent.
+                get the order using all the information from the payment intent.
+                the iexact lookup will provide an exact match but case-insensitive
                 """
-                order = Order.objects.get(  # get the order using all the information from the payment intent.
-                    # the iexact lookup will provide an exact match but case-insensitive
+                order = Order.objects.get(
                     full_name__iexact=shipping_details.name,
                     email__iexact=billing_details.email,
                     phone_number__iexact=shipping_details.phone,

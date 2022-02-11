@@ -5,7 +5,10 @@ from django.conf import settings
 
 from .forms import OrderForm
 from .models import Order, OrderLineItem
+
 from products.models import Product
+from profiles.models import UserProfile
+from profiles.forms import UserProfileForm
 from bag.contexts import bag_contents
 
 import stripe
@@ -16,18 +19,18 @@ import json
 def cache_checkout_data(request):
     try:
         """
-        a way to determie in the webhoook whether a user had saved the
-        save ifo box checked.
+        a way to determine in the webhoook whether a user had saved the
+        save info box checked.
         """ 
-        pid = request.POST.get('client_secret').split('_secret')[0]
+        pid = request.POST.get('client_secret').split('_secret')[0] # retrieve client secret if form is valid and split it to get the payment intent id
         stripe.api_key = settings.STRIPE_SECRET_KEY
+        """
+        tell it what we want to modify in our case we'll add some metadata.
+        Let's add the user who's placing the order.
+        Will add whether or not they wanted to save their information.
+        And add a JSON dump of their shopping bag
+        """
         stripe.PaymentIntent.modify(pid, metadata={
-            """
-            tell it what we want to modify in our case we'll add some metadata.
-            Let's add the user who's placing the order.
-            Will add whether or not they wanted to save their information.
-            And add a JSON dump of their shopping bag
-            """
             'bag': json.dumps(request.session.get('bag', {})),
             'save_info': request.POST.get('save_info'),
             'username': request.user,
@@ -59,12 +62,12 @@ def checkout(request):
         }
         # create instance of form using form data
         order_form = OrderForm(form_data)
-        # if form is valid save order
-        if order_form.is_valid():  # retrieve client secret if form is valid and split it to get the payment intent id
-            """
-            By adding commit equals false this helps
-            prevent multiple save events from being executed on the database.
-            """
+        """
+        if form is valid save order
+        By adding commit equals false this helps
+        prevent multiple save events from being executed on the database.
+        """
+        if order_form.is_valid():  
             order = order_form.save(commit=False)
             pid = request.POST.get('client_secret').split('_secret')[0]
             order.stripe_pid = pid
@@ -90,7 +93,8 @@ def checkout(request):
                         order_line_item.save()
                     else:
                         """
-                        Otherwise, if the item has sizes. we'll iterate through each size and create a line item accordingly.
+                        Otherwise, if the item has sizes. we'll iterate
+                        through each size and create a line item accordingly.
                         """
                         for size, quantity in item_data['items_by_size'].items():
                             order_line_item = OrderLineItem(
@@ -142,7 +146,28 @@ def checkout(request):
             currency=settings.STRIPE_CURRENCY,
         )
 
-        order_form = OrderForm()
+        # Attempt to prefill the form on checkout page with any info the user maintains in their profile
+        # use the initial parameter on the order form to pre-fill all its fields with the relevant information
+        if request.user.is_authenticated:
+            try:
+                profile = UserProfile.objects.get(user=request.user)
+                order_form = OrderForm(initial={
+                    'full_name': profile.user.get_full_name(),  # using the built in get_full_name method on the user account.
+                    'email': profile.user.email,
+                    'phone_number': profile.default_phone_number,
+                    'country': profile.default_country,
+                    'postcode': profile.default_postcode,
+                    'town_or_city': profile.default_town_or_city,
+                    'street_address1': profile.default_street_address1,
+                    'street_address2': profile.default_street_address2,
+                    'county': profile.default_county,
+                })
+            # If the user is not authenticated we'll just render an empty form.
+            except UserProfile.DoesNotExist:
+                order_form = OrderForm()
+
+        else:
+            order_form = OrderForm()
 
     if not stripe_public_key:
         messages.warning(request, 'Stripe public key is missing. \
@@ -164,12 +189,41 @@ def checkout_success(request, order_number):
     This is simply going to take the order number
     and render a nice success page letting the user
     know that their payment is complete
+    first check whether the user wanted to save their information by getting that from the session
     """
-    # first check whether the user wanted to save their information by getting that from the session
     save_info = request.session.get('save_info')
     # use the order number to get the order created in the previous view
     # which we'll send back to the template.
     order = get_object_or_404(Order, order_number=order_number)
+
+    #  check if the user is authenticated because
+    #  if so they'll have a profile that was created when they created their account
+    if request.user.is_authenticated:
+        profile = UserProfile.objects.get(user=request.user)  # retrieve user profile
+        # Attach the user's profile to the order ad save
+        order.user_profile = profile
+        order.save()
+
+        # Save the user's info
+        """
+        the save info box here is used First, determining if it was checked.
+        And if so, pull the data to go in the user's profile off the order into a dictionary of profile data.
+        """
+        if save_info:
+            # The dictionaries keys match the fields on the user profile model.
+            profile_data = {
+                'default_phone_number': order.phone_number,
+                'default_country': order.country,
+                'default_postcode': order.postcode,
+                'default_town_or_city': order.town_or_city,
+                'default_street_address1': order.street_address1,
+                'default_street_address2': order.street_address2,
+                'default_county': order.county,
+            }
+            user_profile_form = UserProfileForm(profile_data, instance=profile)  # create instance of user profile form usig profile data updating the profile data mentioned above
+            if user_profile_form.is_valid():  #  if form is valid ,save 
+                user_profile_form.save()
+
     # attach a success message letting the user know what their order number is.
     # And that will be sending an email to the email they put in the form.
     messages.success(request, f'Order successfully processed! \
@@ -184,5 +238,4 @@ def checkout_success(request, order_number):
     context = {
         'order': order,
     }
-
     return render(request, template, context)
