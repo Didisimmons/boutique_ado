@@ -2,6 +2,7 @@ from django.http import HttpResponse
 
 from .models import Order, OrderLineItem
 from products.models import Product
+from profiles.models import UserProfile
 
 import json
 import time
@@ -65,6 +66,29 @@ class StripeWH_Handler:
                 shipping_details.address[field] = None
 
         """
+        Update profile information if save_info was checked
+        remember that we added that handy key in the payment intent called metadata
+        which contains the username of the user that placed the order.
+        It also contains whether or not they wanted to save their info
+        """
+        profile = None
+        # we can still allow anonymous user to checkout
+        username = intent.metadata.username
+        # if they're not anonymous let's try to get their profile using their username.
+        # If they've got the save info box checked which again comes from the metadata we added.
+        # Then we'll want to update their profile by adding the shipping details as their default delivery information
+        if username != 'AnonymousUser':
+            profile = UserProfile.objects.get(user__username=username)
+            if save_info:
+                profile.default_phone_number = shipping_details.phone
+                profile.default_country = shipping_details.address.country
+                profile.default_postcode = shipping_details.address.postal_code
+                profile.default_town_or_city = shipping_details.address.city
+                profile.default_street_address1 = shipping_details.address.line1
+                profile.default_street_address2 = shipping_details.address.line2
+                profile.default_county = shipping_details.address.state
+                profile.save()
+        """
         The first thing then is to check if the order exists already.
         If it does we'll just return a response, and say everything is all set.
         And if it doesn't we'll create it here in the webhook.
@@ -76,15 +100,15 @@ class StripeWH_Handler:
         not found in the database by creating a bit of delay
         """
         attempt = 1
+        """
+        All of this ensures that when we receive a webhook from stripe that a payment has been processed successfully.
+        We'll try to find an order with the same customer information and the same grand total,
+        Which was created with the exact same shopping bag.And it's associated with the same payment intent.
+        get the order using all the information from the payment intent.
+        the iexact lookup will provide an exact match but case-insensitive
+        """
         while attempt <= 5:
             try:
-                """
-                All of this ensures that when we receive a webhook from stripe that a payment has been processed successfully.
-                We'll try to find an order with the same customer information and the same grand total,
-                Which was created with the exact same shopping bag.And it's associated with the same payment intent.
-                get the order using all the information from the payment intent.
-                the iexact lookup will provide an exact match but case-insensitive
-                """
                 order = Order.objects.get(
                     full_name__iexact=shipping_details.name,
                     email__iexact=billing_details.email,
@@ -100,12 +124,10 @@ class StripeWH_Handler:
                     stripe_pid=pid,
                 )
                 order_exists = True  # if order is found set true
-                break  # break if order is found
+                break  # if order is found
+            # This will in effect cause the webhook handler to try to find the order five times over five seconds
+            # before giving up and creating the order itself.
             except Order.DoesNotExist:
-                """
-                This will in effect cause the webhook handler to try to find the order five times over five seconds
-                before giving up and creating the order itself.
-                """
                 attempt += 1
                 time.sleep(1)
         # if order is true return a 200 HTTP response to stripe, with the message that we verified the order already exists
@@ -116,9 +138,14 @@ class StripeWH_Handler:
         else:
             # if the order does not exist, create it just like we would if the form were submitted (checkout method in views.py)
             order = None
+            """
+            In this way, the webhook handler can create orders for both authenticated users by attaching their profile.
+            And for anonymous users by setting that field to none.
+            """
             try:
                 order = Order.objects.create(
                     full_name=shipping_details.name,
+                    user_profile=profile,
                     email=billing_details.email,
                     phone_number=shipping_details.phone,
                     country=shipping_details.address.country,

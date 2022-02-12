@@ -132,7 +132,7 @@ form.addEventListener('submit', function(ev) {
             }
         });
     }).fail(function () {
-        // // if our view sends a 400 bad request response,just reload the page, the error will be in django messages
+        // if our view sends a 400 bad request response,just reload the page, the error will be in django messages
         location.reload();
     })
 });

@@ -17,19 +17,12 @@ import json
 
 @require_POST
 def cache_checkout_data(request):
+    # a way to determine in the webhoook whether a user had saved the save info box checked.
     try:
-        """
-        a way to determine in the webhoook whether a user had saved the
-        save info box checked.
-        """ 
-        pid = request.POST.get('client_secret').split('_secret')[0] # retrieve client secret if form is valid and split it to get the payment intent id
+        pid = request.POST.get('client_secret').split('_secret')[0]  # retrieve client secret if form is valid and split it to get the payment intent id
         stripe.api_key = settings.STRIPE_SECRET_KEY
-        """
-        tell it what we want to modify in our case we'll add some metadata.
-        Let's add the user who's placing the order.
-        Will add whether or not they wanted to save their information.
-        And add a JSON dump of their shopping bag
-        """
+        # tell it what we want to modify in our case we'll add some metadata.  Let's add the user who's placing the order.
+        # Will add whether or not they wanted to save their information and add a JSON dump of their shopping bag
         stripe.PaymentIntent.modify(pid, metadata={
             'bag': json.dumps(request.session.get('bag', {})),
             'save_info': request.POST.get('save_info'),
@@ -92,10 +85,7 @@ def checkout(request):
                         )
                         order_line_item.save()
                     else:
-                        """
-                        Otherwise, if the item has sizes. we'll iterate
-                        through each size and create a line item accordingly.
-                        """
+                        # Otherwise, if the item has sizes. we'll iterate through each size and create a line item accordingly.
                         for size, quantity in item_data['items_by_size'].items():
                             order_line_item = OrderLineItem(
                                 order=order,
