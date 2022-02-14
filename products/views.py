@@ -155,7 +155,7 @@ def add_product(request):
     """
     if not request.user.is_superuser:
         messages.error(request, 'Sorry, only store owners can do that.')
-        return redirect(reverse('home')
+        return redirect(reverse('home'))
     
     # Add a product to the store
     # instantiate a new instance of the product form from request.post

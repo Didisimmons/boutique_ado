@@ -1,4 +1,5 @@
 from django import forms
+from .widgets import CustomClearableFileInput
 from .models import Product, Category
 
 
@@ -6,7 +7,9 @@ class ProductForm(forms.ModelForm):
     # defines the model and the fields we want to include.
     class Meta:
         model = Product
-        fields = '__all__'  #  will include all the fields.
+        fields = '__all__'  # will include all the fields.
+
+    image = forms.ImageField(label='Image', required=False, widget=CustomClearableFileInput)  # replace the image field on the form with the new one which utilizes the widget. 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
