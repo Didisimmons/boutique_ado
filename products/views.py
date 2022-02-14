@@ -169,3 +169,27 @@ def add_product(request):
     }
 
     return render(request, template, context)
+
+
+def edit_product(request, product_id):
+    """ Edit a product in the store """
+    product = get_object_or_404(Product, pk=product_id)  # prefill the form with the product details
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)  # tell it the specific instance we'd like to update is the product obtained above
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Successfully updated product!')
+            return redirect(reverse('product_detail', args=[product.id]))  # redirect to the product detail page using the product id.
+        else:
+            messages.error(request, 'Failed to update product. Please ensure the form is valid.')  # return the form which will have the errors attached.
+    else:
+        form = ProductForm(instance=product)  # instantiating a product form using the product
+        messages.info(request, f'You are editing {product.name}')  # info message 
+
+    template = 'products/edit_product.html'
+    context = {
+        'form': form,
+        'product': product,
+    }
+
+    return render(request, template, context)
