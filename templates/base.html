@@ -75,7 +75,7 @@
                             </div>
                         </a>
                         <!-- drop-down menu uses several django template tags to determine what to display in the menu-->
-                        <div class="dropdown-menu border-0" aria-labelledby="user-options">
+                        <div class="dropdown-menu border-0" aria-labelledby ="user-options">
                             {% if request.user.is_authenticated %}
                                 {% if request.user.is_superuser %}
                                     <a href="{% url 'add_product' %}" class="dropdown-item">Product Management</a>
