@@ -3,17 +3,13 @@ from django.contrib import messages
 
 from products.models import Product
 
-# Create your views here.
+
 def view_bag(request):
     """ A view that renders the bag contents page """
     return render(request, 'bag/bag.html')
 
-
-"""
-This view we'll get the bag variable if it exists in the session or create it if it doesn't.
-Then add the item to the bag or update the quantity if it already exists.
-And
-"""
+# This view we'll get the bag variable if it exists in the session or create it if it doesn't.
+# Then add the item to the bag or update the quantity if it already exists.
 def add_to_bag(request, item_id):
     """ Add a quantity of the specified product to the shopping bag """
 
