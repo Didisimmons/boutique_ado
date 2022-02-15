@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-j60q7bovy-q!_#!m7cde6o(@i33xaslyk=8z4*vdzq4p1sck^o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#  add the hostname of our Heroku app and the local host so that gitpod will still work too.
+ALLOWED_HOSTS = ['didi-boutique-ado.herokuapp.com', 'localhost']
 
 
 # Application definition
@@ -124,13 +125,19 @@ WSGI_APPLICATION = 'boutique_ado.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# when our app is running on Heroku connect to Postgres, otherwise connect to sequel light the default configuration
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
