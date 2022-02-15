@@ -7,3 +7,5 @@ class CustomClearableFileInput(ClearableFileInput):
     initial_text = _('Current Image')  #  initial text the input text 
     input_text = _('')  # template name With our own values
     template_name = 'products/custom_widget_templates/custom_clearable_file_input.html'  # inside the product apps templates folder I'll create that new template.Making sure its name and location matches what's in our class
+
+
