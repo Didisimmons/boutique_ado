@@ -210,9 +210,8 @@ if 'USE_AWS' in os.environ:
     
 
 
-
-# used to calculate delivery costs
 # stripe
+# used to calculate delivery costs
 FREE_DELIVERY_THRESHOLD = 50
 STANDARD_DELIVERY_PERCENTAGE = 10
 STRIPE_CURRENCY = 'usd'
