@@ -182,6 +182,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 # This informs django were  all are static files are located
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # where all uploaded files would go
 MEDIA_URL = '/media/'

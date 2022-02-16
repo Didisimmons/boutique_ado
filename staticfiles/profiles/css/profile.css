@@ -1,0 +1,22 @@
+.order-history {
+    max-height: 416px; /* height of profile form + submit button */
+    overflow-y: auto;  /* order history scrollbar above height */
+}
+
+
+#profile-update-form .form-control { /* text input color  */
+    color: #000;
+}
+
+#profile-update-form input::placeholder { /* profile forms placeholders are all colored  */
+    color: #aab7c4;
+}
+
+#id_default_country,
+#id_default_country option:not(:first-child) {  /* the first option element the colour of the placeholders */
+    color: #000;
+}
+
+#id_default_country option:first-child {
+    color: #aab7c4;
+}
