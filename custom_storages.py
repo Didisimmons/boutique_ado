@@ -5,8 +5,8 @@ from storages.backends.s3boto3 import S3Boto3Storage
 
 
 class StaticStorage(S3Boto3Storage):
-    location = settings.STATICFILES_LOCATION
+    location = settings.STATICFILES_LOCATION  # to store static files
 
 
 class MediaStorage(S3Boto3Storage):
-    location = settings.MEDIAFILES_LOCATION
+    location = settings.MEDIAFILES_LOCATION  # to store media files
