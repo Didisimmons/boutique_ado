@@ -87,7 +87,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media', # access images in media folder
                 'bag.contexts.bag_contents' # This means that anytime we need to access the bag contents in any template across the entire site they'll be available to us
-                    # without having to return them from a whole bunch of different views across different apps.
+                # without having to return them from a whole bunch of different views across different apps.
             ],
             'builtins': [
                 # This will give access to all the tags we want available(from crispy_forms)
